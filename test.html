@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html ng-app="demo">
+<head lang="en">
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="base.css"/>
+    <title>Angular Route</title>
+
+    <style>
+
+        .border-box {
+            box-sizing: border-box;
+            -moz-box-sizing: border-box;
+        }
+        calendar {
+            float: left;
+            display: block;
+            box-sizing: border-box;
+            -moz-box-sizing: border-box;
+            background: white;
+            width: 300px;
+            border: solid 1px #cccccc;
+            margin-bottom: 10px;
+        }
+        calendar > div.header {
+            float: left;
+            width: 100%;
+            background: #2875c7;
+            height: 40px;
+            color: white;
+        }
+        calendar > div.header > * {
+            height: 40px;
+            line-height: 40px !important;
+            display: inline-block;
+            vertical-align: middle;
+        }
+        calendar > div.header > i {
+            float: left;
+            width: 40px;
+            font-size: 1.125em;
+            font-weight: bold;
+            position: relative;
+            box-sizing: border-box;
+            -moz-box-sizing: border-box;
+            padding: 0 10px;
+            cursor: pointer;
+        }
+        calendar > div.header > i.fa-angle-left {
+            text-align: left;
+        }
+        calendar > div.header > i.fa-angle-right {
+            text-align: right;
+            margin-left: -40px;
+        }
+        calendar > div.header > span {
+            float: left;
+            width: 100%;
+            font-weight: bold;
+            text-transform: uppercase;
+            box-sizing: border-box;
+            -moz-box-sizing: border-box;
+            padding-left: 50px;
+            margin-left: -40px;
+            text-align: center;
+            padding-right: 40px;
+            color: inherit;
+        }
+        calendar > div.week {
+            float: left;
+            width: 100%;
+            border-top: solid 1px #cccccc;
+        }
+        calendar > div.week:first-child {
+            border-top: none;
+        }
+        calendar > div.week > span.day {
+            float: left;
+            width: 14.285714285714286%;
+            box-sizing: border-box;
+            -moz-box-sizing: border-box;
+            border-left: solid 1px #cccccc;
+            font-size: 0.75em;
+            text-align: center;
+            height: 30px;
+            line-height: 30px !important;
+            display: inline-block;
+            vertical-align: middle;
+            background: white;
+            cursor: pointer;
+            color: black;
+        }
+        calendar > div.week > span.day:first-child {
+            border-left: none;
+        }
+        calendar > div.week > span.day.today {
+            background: #E3F2FF;
+        }
+        calendar > div.week > span.day.different-month {
+            color: #C0C0C0;
+        }
+        calendar > div.week > span.day.selected {
+            background: #2875c7;
+            color: white;
+        }
+        calendar > div.week.names > span {
+            color: #2875c7;
+            font-weight: bold;
+        }
+
+
+
+    </style>
+
+    <script src="bower_components/jquery/dist/jquery.js"></script>
+    <link rel="stylesheet" href="bower_components/bootstrap/dist/css/bootstrap.css"/>
+    <script src="bower_components/angular/angular.js"></script>
+    <script src="bower_components/angular-route/angular-route.js"></script>
+    <script src="bower_components/angular-animate/angular-animate.js"></script>
+    <script src="bower_components/bootstrap/dist/js/bootstrap.js"></script>
+    <script src="bower_components/moment/moment.js"></script>
+
+
+    <script>
+        var app = angular.module("demo", []);
+
+        app.controller("calendarDemo", function($scope) {
+            $scope.day = moment();
+        });
+
+        app.directive("calendar", function() {
+            return {
+                restrict: "E",
+                templateUrl: "test.html",
+                scope: {
+                    selected: "="
+                },
+                link: function(scope) {
+                    scope.selected = _removeTime(scope.selected || moment());
+                    scope.month = scope.selected.clone();
+
+                    var start = scope.selected.clone();
+                    start.date(1);
+                    _removeTime(start.day(0));
+
+                    _buildMonth(scope, start, scope.month);
+
+                    scope.select = function(day) {
+                        scope.selected = day.date;
+                    };
+
+                    scope.next = function() {
+                        var next = scope.month.clone();
+                        _removeTime(next.month(next.month()+1)).date(1);
+                        scope.month.month(scope.month.month()+1);
+                        _buildMonth(scope, next, scope.month);
+                    };
+
+                    scope.previous = function() {
+                        var previous = scope.month.clone();
+                        _removeTime(previous.month(previous.month()-1).date(1));
+                        scope.month.month(scope.month.month()-1);
+                        _buildMonth(scope, previous, scope.month);
+                    };
+                }
+            };
+
+            function _removeTime(date) {
+                return date.day(0).hour(0).minute(0).second(0).millisecond(0);
+            }
+
+            function _buildMonth(scope, start, month) {
+                scope.weeks = [];
+                var done = false, date = start.clone(), monthIndex = date.month(), count = 0;
+                while (!done) {
+                    scope.weeks.push({ days: _buildWeek(date.clone(), month) });
+                    date.add(1, "w");
+                    done = count++ > 2 && monthIndex !== date.month();
+                    monthIndex = date.month();
+                }
+            }
+
+            function _buildWeek(date, month) {
+                var days = [];
+                for (var i = 0; i < 7; i++) {
+                    days.push({
+                        name: date.format("dd").substring(0, 1),
+                        number: date.date(),
+                        isCurrentMonth: date.month() === month.month(),
+                        isToday: date.isSame(new Date(), "day"),
+                        date: date
+                    });
+                    date = date.clone();
+                    date.add(1, "d");
+                }
+                return days;
+            }
+        });
+
+    </script>
+</head>
+<body>
+<link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css">
+
+
+<calendar selected="day">
+
+    <div class="header">
+        <i class="fa fa-angle-left" ng-click="previous()"></i>
+        <span>{{month.format("MMMM, YYYY")}}</span>
+        <i class="fa fa-angle-right" ng-click="next()"></i>
+    </div>
+    <div class="week names">
+        <span class="day">Sun</span>
+        <span class="day">Mon</span>
+        <span class="day">Tue</span>
+        <span class="day">Wed</span>
+        <span class="day">Thu</span>
+        <span class="day">Fri</span>
+        <span class="day">Sat</span>
+    </div>
+    <div class="week" ng-repeat="week in weeks">
+        <span class="day" ng-class="{ today: day.isToday, 'different-month': !day.isCurrentMonth, selected: day.date.isSame(selected) }" ng-click="select(day)" ng-repeat="day in week.days">{{day.number}}</span>
+    </div>
+
+</calendar>
+</body>
+</html>

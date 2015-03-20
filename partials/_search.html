@@ -1,0 +1,34 @@
+<style>
+    .dayblock{
+        width: 14.2%;
+        float:left;
+    }
+
+    .container{
+        width:50%;
+        margin:0 auto;
+    }
+
+    .days1 {
+        color: transparent;
+    }
+    .days3 {
+        color: transparent;
+    }
+</style>
+
+<div class="container">
+
+
+    <div>{{month}}</div>
+
+    <div  class="dayblock" ng-repeat="weekday in weekdays">{{weekday}}</div>
+    <div  class="dayblock days1" ng-repeat="day1 in days1">{{day1.day}}</div>
+    <div class="dayblock" ng-repeat="day2 in days2">
+
+        <div>{{day2.day}}  </div>
+    </div>
+
+
+    <div  class="dayblock days3" ng-repeat="day3 in days3">{{day3.day}}</div>
+</div>
